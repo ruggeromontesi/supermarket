@@ -36,6 +36,7 @@ public class SupermarketController {
 
       System.out.println("You are trying to buy " + selectedProduct.getDescription() + ". You need to pay " + selectedProduct.getPrice());
       System.out.println("Provide bill or coin (accepted values: 0.1, 0.5, 1, 2)");
+
    }
 
 
