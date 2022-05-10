@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
-import java.util.function.BiFunction;
 
 import org.reiz.exception.NotEnoughChangeException;
 import org.reiz.exception.PayNotAcceptedException;
@@ -59,13 +58,14 @@ public class SupermarketController {
       }
 
    }
-
+   /*OK**/
    private void printProductInventoryReimplemented() {
       System.out.print("Product Inventory\n");
       productStorage.getInventory().forEach(product -> System.out.print(product.getDescription()
             + " Quantity: " + product.getQuantity() + "\n"));
    }
 
+   /**ok*/
    private void printCashInventory() {
       System.out.println("Cash Inventory");
       cashRegister.getTill().forEach((k,v) -> System.out.println("Value: " + k.getValue() + ", quantity: " + v));
@@ -87,7 +87,7 @@ public class SupermarketController {
       selectedProduct.setQuantity(selectedProduct.getQuantity() - 1);
       selectedProduct = null;
    }
-
+   /**ok*/
    public void userAtomicProductSelection() {
       Scanner in = new Scanner(System.in);
       userTypedProduct = "";
@@ -100,13 +100,6 @@ public class SupermarketController {
       if (selectedProduct.getQuantity() == 0) {
          throw new SoldOutException();
       }
-   }
-
-   public void managePurchaseTransaction(Product selectedProduct) {
-      System.out.println("You are trying to buy " + selectedProduct.getDescription()
-            + ". You need to pay " + selectedProduct.getPrice());
-      System.out.println("Provide bill or coin (accepted values: 0.1, 0.5, 1, 2)");
-      double change = -1;
    }
 
    public void payWholeAmount() {
@@ -134,9 +127,6 @@ public class SupermarketController {
          askAgainToPayIfDueAmountIsNotZero();
       } while (yetToBePaidAmount > 0);
 
-   }
-
-   private void handleChange(double yetToBePaidAmount){
    }
 
    private void askAgainToPayIfDueAmountIsNotZero() {
