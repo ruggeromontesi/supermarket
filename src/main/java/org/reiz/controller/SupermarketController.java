@@ -5,7 +5,10 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 
+import org.reiz.exception.NotEnoughChangeException;
+import org.reiz.exception.PayNotAcceptedException;
 import org.reiz.exception.SoldOutException;
 import org.reiz.model.CashUnit;
 import org.reiz.model.Product;
@@ -40,9 +43,19 @@ public class SupermarketController {
       int counter = 10;
 
       while (counter-- > 0) {
-         printProductInventoryReimplemented();
-         printCashInventory();
-         userExtendedProductSelection();
+         try {
+            printProductInventoryReimplemented();
+            printCashInventory();
+            userExtendedProductSelection();
+
+         } catch (NotEnoughChangeException ex) {
+           System.out.println("Supermarket doesn't have sufficient change to complete this transaction");
+         } catch (SoldOutException ex) {
+           System.out.println("The user requested a product which is sold out or does not exist");
+         } catch (PayNotAcceptedException ex) {
+            System.out.println("The user paid with non-accepted bills or coins");
+         }
+
       }
 
    }
@@ -78,17 +91,13 @@ public class SupermarketController {
    public void userAtomicProductSelection() {
       Scanner in = new Scanner(System.in);
       userTypedProduct = "";
-
-      do {
-         System.out.println("What would you like to buy? Type in the name of the desired product");
-         productStorage.getInventory().forEach(product -> System.out.print(product.getDescription()
-               + " (price: " + product.getPrice() + ")  "));
-         System.out.println("");
-         userTypedProduct = in.nextLine();
-
-      }  while (!productStorage.getInventory().stream().anyMatch(product -> product.getDescription().equals(userTypedProduct)));
+      System.out.println("What would you like to buy? Type in the name of the desired product");
+      productStorage.getInventory().forEach(product -> System.out.print(product.getDescription()
+            + " (price: " + product.getPrice() + ")  "));
+      System.out.println("");
+      userTypedProduct = in.nextLine();
       selectedProduct = productStorage.getByDescription(userTypedProduct).orElseThrow(SoldOutException::new);
-      if(selectedProduct.getQuantity() == 0) {
+      if (selectedProduct.getQuantity() == 0) {
          throw new SoldOutException();
       }
    }
@@ -181,8 +190,11 @@ public class SupermarketController {
 
       } while (dueChange > 0.01);
 
+      verifyThatEnoughChangeIsPresent();
+
       Arrays.stream(CashUnit.values()).forEach(cashUnit -> {
-         cashRegister.getTill().merge(cashUnit, changeCashUnitTable.get(cashUnit), (i1,i2) -> i1 - i2);
+         cashRegister.getTill()
+               .merge(cashUnit, changeCashUnitTable.get(cashUnit),(i1,i2) -> i1 - i2);
       });
    }
 
@@ -204,5 +216,12 @@ public class SupermarketController {
       cumulatedPaidAmount = 0;
       yetToBePaidAmount = 0;
       dueAmount = 0;
+   }
+
+   private void verifyThatEnoughChangeIsPresent() {
+      if (!Arrays.stream(CashUnit.values())
+            .allMatch(cashUnit -> (cashRegister.getTill().get(cashUnit) > changeCashUnitTable.get(cashUnit) - 1))) {
+         throw new NotEnoughChangeException();
+      }
    }
 }
