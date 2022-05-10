@@ -12,20 +12,13 @@ public class App {
       System.out.println("Hello World!");
       //testPayArbitraryAmount();
       //printEmptyCashUnitMap();
-      testReturnChange();
 
 
 
    }
 
 
-   static void testPayArbitraryAmount() {
-      SupermarketController controller = new SupermarketController();
-      ProductStorage productStorage = new ProductStorage();
-      System.out.println("You need to pay 2.3\n");
-      controller.payWholeAmount(2.3, new CashRegister());
 
-   }
 
    static void testUserSelectProduct() {
       SupermarketController controller = new SupermarketController();
@@ -40,14 +33,4 @@ public class App {
    }
 
 
-   static void testReturnChange() {
-      SupermarketController controller = new SupermarketController();
-      CashRegister cashRegister = new CashRegister();
-      Map<CashUnit,Integer> map =controller.returnChange(0.7,cashRegister );
-      System.out.println(map);
-      controller.printCashInventory(cashRegister);
-
-
-
-   }
 }

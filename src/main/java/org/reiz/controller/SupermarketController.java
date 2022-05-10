@@ -1,15 +1,11 @@
 package org.reiz.controller;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.reiz.model.CashUnit;
 import org.reiz.model.Product;
@@ -55,13 +51,12 @@ public class SupermarketController {
    public void payWholeAmount(double dueAmount, CashRegister cashRegister) {
       double paidAmount = 0;
       double yetToBePaidAmount = dueAmount;
-      Map<CashUnit,Integer> billCoinsCount = getEmptyCashUnitTable();
+      Map<CashUnit,Integer> currentPaymentBufferMap = getEmptyCashUnitTable();
 
       do {
-         paidAmount = payArbitraryAmount(billCoinsCount);
+         paidAmount = payArbitraryAmount(currentPaymentBufferMap);
 
-         yetToBePaidAmount -= paidAmount;
-         yetToBePaidAmount = ((double)Math.round(10*yetToBePaidAmount))/10;
+         yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - paidAmount))) / 10;
          if (yetToBePaidAmount > 0) {
             System.out.println("You paid " + paidAmount + " in total. You still need to pay " + yetToBePaidAmount);
             System.out.println("Provide bill or coin (accepted values: 0.1, 0.5, 1, 2)");
@@ -75,12 +70,15 @@ public class SupermarketController {
          returnChange(-yetToBePaidAmount).forEach((k,v) -> System.out.println("Value : " + k.getValue() + " quantity: " + v));
       }
 
-      BiFunction<Integer,Integer,Integer> addBillCoin = Integer::sum;
       Arrays.stream(CashUnit.values()).forEach(cashUnit -> {
-         cashRegister.getTill().merge(cashUnit,billCoinsCount.get(cashUnit), addBillCoin);
+         cashRegister.getTill().merge(cashUnit,currentPaymentBufferMap.get(cashUnit), Integer::sum);
       });
 
       printCashInventory(cashRegister);
+   }
+
+   private void askAgainToPayIfDueAmountIsNotZero(){
+
    }
 
    public double payArbitraryAmount(Map<CashUnit,Integer> billCoinsCount) {
@@ -112,28 +110,16 @@ public class SupermarketController {
          CashUnit firstCashUnit =
                Arrays.stream(CashUnit.values()).sorted(Comparator.comparingDouble(CashUnit::getValue).reversed())
                      .filter(cashUnit -> cashUnit.getValue() <= finalDueChange).findFirst().get();
-         changeCashUnitTable.put(firstCashUnit,changeCashUnitTable.get(firstCashUnit) + 1);
-         dueChange = dueChange - firstCashUnit.getValue();
-         dueChange = ((double)Math.round(10 * dueChange)) / 10;
+         changeCashUnitTable.merge(firstCashUnit, 1 ,Integer::sum);
+         dueChange = ((double)Math.round(10 * (dueChange - firstCashUnit.getValue()))) / 10;
 
       } while (dueChange > 0.01);
 
-      //cashRegister.getTill().forEach((cashUnit, integer) ->
-      /*Arrays.stream(CashUnit.values()).forEach(cashUnit -> {
-         cashRegister.getTill().put(cashUnit, cashRegister.getTill().get(cashUnit) - changeCashUnitTable.get(cashUnit));
-      });*/
-
-      BiFunction<Integer,Integer,Integer> removeBillCoin = (i1,i2) -> i1 - i2;
-
       Arrays.stream(CashUnit.values()).forEach(cashUnit -> {
-         cashRegister.getTill().merge(cashUnit, changeCashUnitTable.get(cashUnit), removeBillCoin);
+         cashRegister.getTill().merge(cashUnit, changeCashUnitTable.get(cashUnit), (i1,i2) -> i1 - i2);
       });
-
-
-
       return changeCashUnitTable;
    }
-
 
    public Map<CashUnit,Integer> returnChange(double dueChange) {
       Map<CashUnit,Integer> changeCashUnitTable = getEmptyCashUnitTable();
@@ -143,7 +129,9 @@ public class SupermarketController {
          CashUnit firstCashUnit =
                Arrays.stream(CashUnit.values()).sorted(Comparator.comparingDouble(CashUnit::getValue).reversed())
                      .filter(cashUnit -> cashUnit.getValue() <= finalDueChange).findFirst().get();
-         changeCashUnitTable.put(firstCashUnit,changeCashUnitTable.get(firstCashUnit) + 1);
+         //changeCashUnitTable.put(firstCashUnit,changeCashUnitTable.get(firstCashUnit) + 1);
+         //try to use merge method
+         changeCashUnitTable.merge(firstCashUnit, 1,Integer::sum);
          dueChange = dueChange - firstCashUnit.getValue();
          dueChange = ((double)Math.round(10 * dueChange)) / 10;
 

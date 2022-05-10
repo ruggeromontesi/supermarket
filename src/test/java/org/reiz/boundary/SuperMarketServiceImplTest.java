@@ -1,8 +1,11 @@
 package org.reiz.boundary;
 
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.reiz.controller.SupermarketController;
+import org.reiz.model.CashUnit;
 import org.reiz.storage.CashRegister;
 import org.reiz.storage.ProductStorage;
 
@@ -39,4 +42,6 @@ public class SuperMarketServiceImplTest {
       controller.userSelectProduct(productStorage);
 
    }
+
+
 }
