@@ -10,11 +10,6 @@ import org.reiz.storage.ProductStorage;
 public class App {
    public static void main(String[] args) {
       System.out.println("Hello World!");
-      //testPayArbitraryAmount();
-      //printEmptyCashUnitMap();
-
-
-
    }
 
 

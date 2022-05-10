@@ -14,6 +14,13 @@ import org.reiz.storage.ProductStorage;
 
 public class SupermarketController {
 
+   double paidAmountDuringAtomicIteration = 0;
+   double cumulatedPaidAmount = 0;
+   double yetToBePaidAmount = 0;
+   double dueAmount = 0;
+
+
+
    public void printProductInventory(ProductStorage productStorage) {
       System.out.print("Product Inventory\n");
       productStorage.getInventory().forEach(product -> System.out.print(product.getDescription()
@@ -49,36 +56,79 @@ public class SupermarketController {
    }
 
    public void payWholeAmount(double dueAmount, CashRegister cashRegister) {
-      double paidAmount = 0;
+      double paidAmountDuringAtomicIteration = 0;
+      double cumulatedPaidAmount = 0;
       double yetToBePaidAmount = dueAmount;
+
       Map<CashUnit,Integer> currentPaymentBufferMap = getEmptyCashUnitTable();
 
       do {
-         paidAmount = payArbitraryAmount(currentPaymentBufferMap);
+         paidAmountDuringAtomicIteration = payArbitraryAmount(currentPaymentBufferMap);
 
-         yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - paidAmount))) / 10;
-         if (yetToBePaidAmount > 0) {
-            System.out.println("You paid " + paidAmount + " in total. You still need to pay " + yetToBePaidAmount);
-            System.out.println("Provide bill or coin (accepted values: 0.1, 0.5, 1, 2)");
-         }
+         yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - paidAmountDuringAtomicIteration))) / 10;
+         cumulatedPaidAmount += paidAmountDuringAtomicIteration;
+
+         askAgainToPayIfDueAmountIsNotZero(yetToBePaidAmount, paidAmountDuringAtomicIteration);
 
       } while (yetToBePaidAmount > 0);
 
       if (yetToBePaidAmount != 0) {
-         System.out.println("You paid " + paidAmount + " in total. Your change will be " + (-yetToBePaidAmount));
+         System.out.println("You paid " + cumulatedPaidAmount + " in total. Your change will be " + (-yetToBePaidAmount));
          System.out.println("Here is your change");
-         returnChange(-yetToBePaidAmount).forEach((k,v) -> System.out.println("Value : " + k.getValue() + " quantity: " + v));
+         printChange(returnChange(-yetToBePaidAmount,cashRegister));
       }
 
-      Arrays.stream(CashUnit.values()).forEach(cashUnit -> {
-         cashRegister.getTill().merge(cashUnit,currentPaymentBufferMap.get(cashUnit), Integer::sum);
-      });
-
+      putCoinsAndBillsIntoTill(cashRegister,currentPaymentBufferMap);
       printCashInventory(cashRegister);
    }
 
-   private void askAgainToPayIfDueAmountIsNotZero(){
 
+   public void payWholeAmountReimplemented(double dueAmount, CashRegister cashRegister) {
+      double paidAmountDuringAtomicIteration = 0;
+      double cumulatedPaidAmount = 0;
+      double yetToBePaidAmount = dueAmount;
+
+      Map<CashUnit,Integer> currentPaymentBufferMap = getEmptyCashUnitTable();
+
+      do {
+         paidAmountDuringAtomicIteration = payArbitraryAmount(currentPaymentBufferMap);
+
+         yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - paidAmountDuringAtomicIteration))) / 10;
+         cumulatedPaidAmount += paidAmountDuringAtomicIteration;
+
+         askAgainToPayIfDueAmountIsNotZero(yetToBePaidAmount, paidAmountDuringAtomicIteration);
+
+      } while (yetToBePaidAmount > 0);
+
+      if (yetToBePaidAmount != 0) {
+         System.out.println("You paid " + cumulatedPaidAmount + " in total. Your change will be " + (-yetToBePaidAmount));
+         System.out.println("Here is your change");
+         printChange(returnChange(-yetToBePaidAmount,cashRegister));
+      }
+
+      putCoinsAndBillsIntoTill(cashRegister,currentPaymentBufferMap);
+      printCashInventory(cashRegister);
+   }
+
+
+
+   private void handleChange(double yetToBePaidAmount){
+
+   }
+
+   private void askAgainToPayIfDueAmountIsNotZero(double yetToBePaidAmount, double paidAmount) {
+      if (yetToBePaidAmount > 0) {
+         System.out.println("You paid " + paidAmount + " in total. You still need to pay " + yetToBePaidAmount);
+         System.out.println("Provide bill or coin (accepted values: 0.1, 0.5, 1, 2)");
+      }
+   }
+
+   private void printChange(Map<CashUnit,Integer> changeCashUnitTable) {
+      changeCashUnitTable.entrySet().stream()
+            .sorted((e1,e2) ->  (int) (10 * (e1.getKey().getValue() - e2.getKey().getValue())))
+            .filter(e -> e.getValue() > 0).forEach(e -> System.out.println(
+                  "Value"
+                        + " : " + e.getKey().getValue() + " quantity: " + e.getValue()));
    }
 
    public double payArbitraryAmount(Map<CashUnit,Integer> billCoinsCount) {
@@ -121,27 +171,35 @@ public class SupermarketController {
       return changeCashUnitTable;
    }
 
-   public Map<CashUnit,Integer> returnChange(double dueChange) {
-      Map<CashUnit,Integer> changeCashUnitTable = getEmptyCashUnitTable();
-
-      do {
-         double finalDueChange = dueChange;
-         CashUnit firstCashUnit =
-               Arrays.stream(CashUnit.values()).sorted(Comparator.comparingDouble(CashUnit::getValue).reversed())
-                     .filter(cashUnit -> cashUnit.getValue() <= finalDueChange).findFirst().get();
-         //changeCashUnitTable.put(firstCashUnit,changeCashUnitTable.get(firstCashUnit) + 1);
-         //try to use merge method
-         changeCashUnitTable.merge(firstCashUnit, 1,Integer::sum);
-         dueChange = dueChange - firstCashUnit.getValue();
-         dueChange = ((double)Math.round(10 * dueChange)) / 10;
-
-      } while (dueChange > 0.01);
-      return changeCashUnitTable;
-   }
-
    public static Map<CashUnit,Integer> getEmptyCashUnitTable() {
       Map<CashUnit,Integer> emptyCashUnitTable = new TreeMap<>(Comparator.comparingDouble(CashUnit::getValue).reversed());
       Arrays.stream(CashUnit.values()).forEach(cashUnit -> emptyCashUnitTable.put(cashUnit,0));
       return emptyCashUnitTable;
    }
+
+   private void putCoinsAndBillsIntoTill(CashRegister cashRegister, Map<CashUnit,Integer> currentPaymentBufferMap) {
+      Arrays.stream(CashUnit.values()).forEach(cashUnit -> {
+         cashRegister.getTill().merge(cashUnit,currentPaymentBufferMap.get(cashUnit), Integer::sum);
+      });
+
+   }
+
+   private void processPaymentTillReachingTheDueAmount(Map<CashUnit,Integer> currentPaymentBufferMap, Double yetToBePaidAmount, Double cumulatedPaidAmount ) {
+      double paidAmountDuringAtomicIteration = 0;
+      do {
+         paidAmountDuringAtomicIteration = payArbitraryAmount(currentPaymentBufferMap);
+
+         yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - paidAmountDuringAtomicIteration))) / 10;
+         cumulatedPaidAmount += paidAmountDuringAtomicIteration;
+
+         askAgainToPayIfDueAmountIsNotZero(yetToBePaidAmount, paidAmountDuringAtomicIteration);
+
+      } while (yetToBePaidAmount > 0);
+
+   }
+
+
+
+
+
 }
