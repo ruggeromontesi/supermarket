@@ -1,10 +1,6 @@
 package org.reiz;
 
-import java.util.Map;
-
 import org.reiz.controller.SupermarketController;
-import org.reiz.model.CashUnit;
-import org.reiz.storage.CashRegister;
 import org.reiz.storage.ProductStorage;
 
 public class App {
@@ -12,13 +8,10 @@ public class App {
       System.out.println("Hello World!");
    }
 
-
-
-
    static void testUserSelectProduct() {
       SupermarketController controller = new SupermarketController();
       ProductStorage productStorage = new ProductStorage();
-      controller.userSelectProduct(productStorage);
+      //controller.userSelectProduct(productStorage);
 
    }
 

@@ -1,13 +1,8 @@
 package org.reiz.boundary;
 
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.reiz.controller.SupermarketController;
-import org.reiz.model.CashUnit;
-import org.reiz.storage.CashRegister;
-import org.reiz.storage.ProductStorage;
 
 public class SuperMarketServiceImplTest {
 
@@ -20,27 +15,22 @@ public class SuperMarketServiceImplTest {
 
    @Test
    public void testPrintInitialProductInventory() {
-      ProductStorage productStorage = new ProductStorage();
-      controller.printProductInventory(productStorage);
+      //controller.printProductInventoryReimplemented();
    }
 
    @Test
    public void testInitialCashInventory() {
-      CashRegister cashRegister = new CashRegister();
-      controller.printCashInventory(cashRegister);
+      //controller.printCashInventory();
    }
 
    @Test
    public void testuserSelectProduct() {
-      ProductStorage productStorage = new ProductStorage();
-      controller.userSelectProduct(productStorage);
-
+      //controller.printCashInventory();
    }
 
+   @Test
    public void testUserSelectProduct() {
-      ProductStorage productStorage = new ProductStorage();
-      controller.userSelectProduct(productStorage);
-
+      controller.userExtendedProductSelection();
    }
 
 
