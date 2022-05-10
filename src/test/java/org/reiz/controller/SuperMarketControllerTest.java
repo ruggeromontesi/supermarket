@@ -31,4 +31,14 @@ public class SuperMarketControllerTest {
       controller.payWholeAmount(2.3, new CashRegister());
 
    }
+
+
+   @Test
+   public void testPayWholeAmountReimplemented() {
+      SupermarketController controller = new SupermarketController();
+      ProductStorage productStorage = new ProductStorage();
+      System.out.println("You need to pay 2.3\n");
+      controller.payWholeAmountReimplemented();
+
+   }
 }

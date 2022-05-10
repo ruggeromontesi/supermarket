@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
-import java.util.function.BiFunction;
 
 import org.reiz.model.CashUnit;
 import org.reiz.model.Product;
@@ -14,10 +13,15 @@ import org.reiz.storage.ProductStorage;
 
 public class SupermarketController {
 
-   double paidAmountDuringAtomicIteration = 0;
-   double cumulatedPaidAmount = 0;
-   double yetToBePaidAmount = 0;
-   double dueAmount = 0;
+   private double paidAmountDuringAtomicIteration = 0;
+   private double cumulatedPaidAmount = 0;
+   private double yetToBePaidAmount = 0;
+   private double dueAmount = 2.3;
+   private Map<CashUnit,Integer> currentPaymentBufferMap = getEmptyCashUnitTable();
+   private Map<CashUnit,Integer> billCoinsCount = getEmptyCashUnitTable();
+   private Map<CashUnit,Integer> changeCashUnitTable = getEmptyCashUnitTable();
+   private CashRegister cashRegister = new CashRegister();
+   private double dueChange;
 
 
 
@@ -28,6 +32,11 @@ public class SupermarketController {
    }
 
    public void printCashInventory(CashRegister cashRegister) {
+      System.out.println("Product Inventory");
+      cashRegister.getTill().forEach((k,v) -> System.out.println("Value: " + k.getValue() + ", quantity: " + v));
+   }
+
+   public void printCashInventoryReimplemented() {
       System.out.println("Product Inventory");
       cashRegister.getTill().forEach((k,v) -> System.out.println("Value: " + k.getValue() + ", quantity: " + v));
    }
@@ -83,31 +92,33 @@ public class SupermarketController {
    }
 
 
-   public void payWholeAmountReimplemented(double dueAmount, CashRegister cashRegister) {
-      double paidAmountDuringAtomicIteration = 0;
-      double cumulatedPaidAmount = 0;
-      double yetToBePaidAmount = dueAmount;
 
-      Map<CashUnit,Integer> currentPaymentBufferMap = getEmptyCashUnitTable();
 
-      do {
-         paidAmountDuringAtomicIteration = payArbitraryAmount(currentPaymentBufferMap);
 
-         yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - paidAmountDuringAtomicIteration))) / 10;
-         cumulatedPaidAmount += paidAmountDuringAtomicIteration;
-
-         askAgainToPayIfDueAmountIsNotZero(yetToBePaidAmount, paidAmountDuringAtomicIteration);
-
-      } while (yetToBePaidAmount > 0);
-
+   public void payWholeAmountReimplemented() {
+      yetToBePaidAmount = dueAmount;
+      processPaymentTillReachingTheDueAmountReimplemented();
       if (yetToBePaidAmount != 0) {
          System.out.println("You paid " + cumulatedPaidAmount + " in total. Your change will be " + (-yetToBePaidAmount));
          System.out.println("Here is your change");
-         printChange(returnChange(-yetToBePaidAmount,cashRegister));
+         returnChangeReimplemented();
+         printChangeReimplemented();
       }
+      putCoinsAndBillsIntoTillReimplemented();
+      printCashInventoryReimplemented();
+   }
 
-      putCoinsAndBillsIntoTill(cashRegister,currentPaymentBufferMap);
-      printCashInventory(cashRegister);
+
+   private void processPaymentTillReachingTheDueAmountReimplemented() {
+      paidAmountDuringAtomicIteration = 0;
+      do {
+         payAtomicAmountReimplemented();
+
+         yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - paidAmountDuringAtomicIteration))) / 10;
+         cumulatedPaidAmount += paidAmountDuringAtomicIteration;
+         askAgainToPayIfDueAmountIsNotZeroReimplemented();
+      } while (yetToBePaidAmount > 0);
+
    }
 
 
@@ -123,6 +134,16 @@ public class SupermarketController {
       }
    }
 
+   private void askAgainToPayIfDueAmountIsNotZeroReimplemented() {
+      if (yetToBePaidAmount > 0) {
+         System.out.println("You paid " + cumulatedPaidAmount + " in total. You still need to pay " + yetToBePaidAmount);
+         System.out.println("Provide bill or coin (accepted values: 0.1, 0.5, 1, 2)");
+      }
+   }
+
+
+
+
    private void printChange(Map<CashUnit,Integer> changeCashUnitTable) {
       changeCashUnitTable.entrySet().stream()
             .sorted((e1,e2) ->  (int) (10 * (e1.getKey().getValue() - e2.getKey().getValue())))
@@ -130,6 +151,17 @@ public class SupermarketController {
                   "Value"
                         + " : " + e.getKey().getValue() + " quantity: " + e.getValue()));
    }
+
+   private void printChangeReimplemented() {
+      changeCashUnitTable.entrySet().stream()
+            .sorted((e1,e2) ->  (int) (10 * (e1.getKey().getValue() - e2.getKey().getValue())))
+            .filter(e -> e.getValue() > 0).forEach(e -> System.out.println(
+                  "Value"
+                        + " : " + e.getKey().getValue() + " quantity: " + e.getValue()));
+   }
+
+
+
 
    public double payArbitraryAmount(Map<CashUnit,Integer> billCoinsCount) {
       Scanner in = new Scanner(System.in);
@@ -152,6 +184,30 @@ public class SupermarketController {
 
    }
 
+
+
+   public double payAtomicAmountReimplemented() {
+      Scanner in = new Scanner(System.in);
+      String userPaidAmount;
+      double amountFromKeyboard = 0;
+      boolean askAgain = true;
+      do {
+         userPaidAmount  = in.nextLine();
+         try {
+            amountFromKeyboard = Double.parseDouble(userPaidAmount);
+            CashUnit thisCashUnit = CashUnit.valueOf(amountFromKeyboard);
+            billCoinsCount.put(thisCashUnit, billCoinsCount.get(thisCashUnit) + 1);
+            askAgain = false;
+
+         } catch (NullPointerException | NumberFormatException ignored) {
+         }
+      } while (askAgain);
+
+      paidAmountDuringAtomicIteration = amountFromKeyboard;
+
+      return amountFromKeyboard;
+
+   }
    public Map<CashUnit,Integer> returnChange(double dueChange, CashRegister cashRegister) {
       Map<CashUnit,Integer> changeCashUnitTable = getEmptyCashUnitTable();
 
@@ -171,6 +227,28 @@ public class SupermarketController {
       return changeCashUnitTable;
    }
 
+
+   public void returnChangeReimplemented() {
+      dueChange = -yetToBePaidAmount;
+
+      do {
+         double finalDueChange = dueChange;
+         CashUnit firstCashUnit =
+               Arrays.stream(CashUnit.values()).sorted(Comparator.comparingDouble(CashUnit::getValue).reversed())
+                     .filter(cashUnit -> cashUnit.getValue() <= finalDueChange).findFirst().get();
+         changeCashUnitTable.merge(firstCashUnit, 1 ,Integer::sum);
+         dueChange = ((double)Math.round(10 * (dueChange - firstCashUnit.getValue()))) / 10;
+
+      } while (dueChange > 0.01);
+
+      Arrays.stream(CashUnit.values()).forEach(cashUnit -> {
+         cashRegister.getTill().merge(cashUnit, changeCashUnitTable.get(cashUnit), (i1,i2) -> i1 - i2);
+      });
+
+   }
+
+
+
    public static Map<CashUnit,Integer> getEmptyCashUnitTable() {
       Map<CashUnit,Integer> emptyCashUnitTable = new TreeMap<>(Comparator.comparingDouble(CashUnit::getValue).reversed());
       Arrays.stream(CashUnit.values()).forEach(cashUnit -> emptyCashUnitTable.put(cashUnit,0));
@@ -184,19 +262,14 @@ public class SupermarketController {
 
    }
 
-   private void processPaymentTillReachingTheDueAmount(Map<CashUnit,Integer> currentPaymentBufferMap, Double yetToBePaidAmount, Double cumulatedPaidAmount ) {
-      double paidAmountDuringAtomicIteration = 0;
-      do {
-         paidAmountDuringAtomicIteration = payArbitraryAmount(currentPaymentBufferMap);
-
-         yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - paidAmountDuringAtomicIteration))) / 10;
-         cumulatedPaidAmount += paidAmountDuringAtomicIteration;
-
-         askAgainToPayIfDueAmountIsNotZero(yetToBePaidAmount, paidAmountDuringAtomicIteration);
-
-      } while (yetToBePaidAmount > 0);
+   private void putCoinsAndBillsIntoTillReimplemented() {
+      Arrays.stream(CashUnit.values()).forEach(cashUnit -> {
+         cashRegister.getTill().merge(cashUnit,currentPaymentBufferMap.get(cashUnit), Integer::sum);
+      });
 
    }
+
+
 
 
 
