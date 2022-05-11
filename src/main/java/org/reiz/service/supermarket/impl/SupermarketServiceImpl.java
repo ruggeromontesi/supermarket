@@ -23,6 +23,8 @@ public class SupermarketServiceImpl implements SupermarketService {
 
    private double dueAmount;
 
+   private boolean isTransactionToBeCanceled = false;
+
    private ProductStorage productStorage = new ProductStorage();
 
    private CashRegister cashRegister = CashRegister.getInstance();
@@ -37,11 +39,10 @@ public class SupermarketServiceImpl implements SupermarketService {
    }
 
    public void runSupermarket() {
-      int counter = 10;
       productStorage.fillWithProducts(10);
       cashRegister.fillWithFiniteAmountOfBillsAndCoins(50);
 
-      while (counter-- > 0) {
+      while (true) {
          try {
             executeSteps();
 
@@ -57,9 +58,15 @@ public class SupermarketServiceImpl implements SupermarketService {
    }
 
    private void executeSteps() {
+      isTransactionToBeCanceled = false;
       listAllAvailableProducts();
       userSelectProductName();
-      cashService.userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(dueAmount);
+      if (isTransactionToBeCanceled) {
+         return;
+      }
+      if (!cashService.userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(dueAmount)) {
+         return;
+      }
       cashService.provideChangeIfNecessary();
       provideProduct();
    }
@@ -75,6 +82,10 @@ public class SupermarketServiceImpl implements SupermarketService {
       Scanner in = new Scanner(System.in);
       userTypedProduct = "";
       userTypedProduct = in.nextLine();
+      if (verifyIfTransactionHasToBeCanceled(userTypedProduct)) {
+         System.out.println("Transaction interrupted on customer's request.");
+         return;
+      }
       selectedProduct = productStorage.getByDescription(userTypedProduct).orElseThrow(SoldOutException::new);
       if (selectedProduct.getQuantity() == 0) {
          throw new SoldOutException();
@@ -95,10 +106,19 @@ public class SupermarketServiceImpl implements SupermarketService {
    private void listAllAvailableProducts() {
       printProductInventory();
       cashService.printCashInventory();
+      System.out.println("Type CANCEL to terminate transaction at any time");
       System.out.println("What would you like to buy? Type in the name of the desired product");
       productStorage.getInventory().forEach(product -> System.out.print(product.getDescription()
             + " (price: " + product.getPrice() + ")  "));
       System.out.println("");
+
+   }
+
+   private boolean verifyIfTransactionHasToBeCanceled(String interruptCommand) {
+      if (interruptCommand.equals("CANCEL")) {
+         isTransactionToBeCanceled =  true;
+      }
+      return isTransactionToBeCanceled;
    }
 
 }

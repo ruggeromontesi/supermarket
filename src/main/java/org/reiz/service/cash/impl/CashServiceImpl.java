@@ -24,6 +24,8 @@ public class CashServiceImpl implements CashService {
 
    private double yetToBePaidAmount = 0;
 
+   private boolean isTransactionToBeCanceled = false;
+
    private Map<CashUnit,Integer> currentPaymentBufferMap = getEmptyCashUnitTable();
 
    private Map<CashUnit,Integer> changeCashUnitTable = getEmptyCashUnitTable();
@@ -60,16 +62,22 @@ public class CashServiceImpl implements CashService {
       System.out.println("\n\n-----------------");
    }
 
-   public void userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(double dueAmount) {
+   public boolean userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(double dueAmount) {
+      isTransactionToBeCanceled = false;
       yetToBePaidAmount = dueAmount;
       cumulatedPaidAmount = 0;
       amountPaidDuringSingleBillCoinInsertion = 0;
       do {
          userInsertsSingleCoinOrBill();
+         if (isTransactionToBeCanceled) {
+            return false;
+         }
          yetToBePaidAmount = ((double)Math.round(10 * (yetToBePaidAmount - amountPaidDuringSingleBillCoinInsertion))) / 10;
          cumulatedPaidAmount += amountPaidDuringSingleBillCoinInsertion;
          askAgainToPayIfDueAmountIsNotZero();
       } while (yetToBePaidAmount > 0);
+
+      return  true;
    }
 
    public void userInsertsSingleCoinOrBill() {
@@ -77,6 +85,12 @@ public class CashServiceImpl implements CashService {
       String userPaidAmount;
       CashUnit thisCashUnit = null;
       userPaidAmount  = in.nextLine();
+      if (verifyIfTransactionHasToBeCanceled(userPaidAmount)) {
+         System.out.println("Transaction interrupted on customer's request.");
+         currentPaymentBufferMap = getEmptyCashUnitTable();
+         return;
+      }
+
       try {
          thisCashUnit = CashUnit.valueOf(Double.parseDouble(userPaidAmount));
          currentPaymentBufferMap.put(thisCashUnit, currentPaymentBufferMap.get(thisCashUnit) + 1);
@@ -141,6 +155,13 @@ public class CashServiceImpl implements CashService {
             .allMatch(cashUnit -> (cashRegister.getTill().get(cashUnit) > changeCashUnitTable.get(cashUnit) - 1))) {
          throw new NotEnoughChangeException();
       }
+   }
+
+   private boolean verifyIfTransactionHasToBeCanceled(String interruptCommand) {
+      if(interruptCommand.equals("CANCEL")) {
+         isTransactionToBeCanceled =  true;
+      }
+      return isTransactionToBeCanceled;
    }
 
 }

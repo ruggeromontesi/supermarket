@@ -6,7 +6,7 @@ public interface CashService {
 
    void printCashInventory();
 
-   void userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(double dueAmount);
+   boolean userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(double dueAmount);
 
    void userInsertsSingleCoinOrBill();
 }
