@@ -13,7 +13,7 @@ import org.reiz.storage.CashRegister;
 
 public class CashServiceImpl implements CashService {
 
-   private CashRegister cashRegister = CashRegister.getInstance();
+   private static final CashRegister cashRegister = CashRegister.getInstance();
 
    private static final CashServiceImpl instance = new CashServiceImpl();
 
@@ -22,8 +22,6 @@ public class CashServiceImpl implements CashService {
    private double cumulatedPaidAmount = 0;
 
    private double yetToBePaidAmount = 0;
-
-   private double dueChange;
 
    private Map<CashUnit,Integer> currentPaymentBufferMap = getEmptyCashUnitTable();
 
@@ -116,7 +114,7 @@ public class CashServiceImpl implements CashService {
    }
 
    private void provideChange() {
-      dueChange = -yetToBePaidAmount;
+      double dueChange = -yetToBePaidAmount;
 
       do {
          double finalDueChange = dueChange;

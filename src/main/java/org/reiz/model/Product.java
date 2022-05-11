@@ -2,7 +2,9 @@ package org.reiz.model;
 
 public class Product {
    private String description;
+
    private double price;
+
    private int quantity;
 
    public Product(String description, double price, int quantity) {
@@ -34,8 +36,5 @@ public class Product {
    public void setQuantity(int quantity) {
       this.quantity = quantity;
    }
-
-
-
 
 }

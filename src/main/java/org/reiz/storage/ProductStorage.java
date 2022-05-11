@@ -26,15 +26,14 @@ public class ProductStorage {
    }
 
    public Optional<Product> getByDescription(String description) {
-      return inventory.stream().filter(product -> product.getDescription().equals(description)).collect(Collectors.collectingAndThen(
-            Collectors.toList(),
-            list -> {
-               if (list.size() > 1) {
-                  throw new RuntimeException("More than a product with same description!");
-               }
-               return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
-
-            }
+      return inventory.stream().filter(product -> product.getDescription().equals(description))
+            .collect(Collectors.collectingAndThen(
+            Collectors.toList(), list -> {
+                  if (list.size() > 1) {
+                     throw new RuntimeException("More than a product with same description!");
+                  }
+                  return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+                  }
       ));
 
    }

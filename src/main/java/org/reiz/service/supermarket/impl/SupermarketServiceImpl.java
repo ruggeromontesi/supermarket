@@ -2,11 +2,12 @@ package org.reiz.service.supermarket.impl;
 
 import java.util.Scanner;
 
-import org.reiz.service.cash.CashService;
 import org.reiz.exception.NotEnoughChangeException;
 import org.reiz.exception.PayNotAcceptedException;
 import org.reiz.exception.SoldOutException;
 import org.reiz.model.Product;
+import org.reiz.service.cash.CashService;
+
 import org.reiz.service.cash.impl.CashServiceImpl;
 import org.reiz.service.supermarket.SupermarketService;
 import org.reiz.storage.CashRegister;
@@ -14,7 +15,7 @@ import org.reiz.storage.ProductStorage;
 
 public class SupermarketServiceImpl implements SupermarketService {
 
-   private final static SupermarketServiceImpl instance = new SupermarketServiceImpl();
+   private static final SupermarketServiceImpl instance = new SupermarketServiceImpl();
 
    private String userTypedProduct = "";
 
