@@ -7,6 +7,7 @@ import java.util.Scanner;
 import java.util.TreeMap;
 
 import org.reiz.exception.NotEnoughChangeException;
+import org.reiz.exception.PayNotAcceptedException;
 import org.reiz.model.CashUnit;
 import org.reiz.service.cash.CashService;
 import org.reiz.storage.CashRegister;
@@ -80,7 +81,8 @@ public class CashServiceImpl implements CashService {
          thisCashUnit = CashUnit.valueOf(Double.parseDouble(userPaidAmount));
          currentPaymentBufferMap.put(thisCashUnit, currentPaymentBufferMap.get(thisCashUnit) + 1);
 
-      } catch (NullPointerException | NumberFormatException ignored) {
+      } catch (NullPointerException | NumberFormatException ex) {
+         throw  new PayNotAcceptedException();
       }
       amountPaidDuringSingleBillCoinInsertion =  thisCashUnit != null ? thisCashUnit.getValue() : 0;
    }
