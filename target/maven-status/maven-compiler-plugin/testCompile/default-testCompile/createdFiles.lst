@@ -1,0 +1,4 @@
+org\reiz\split\product\ProductControllerTest.class
+org\reiz\split\cash\CashControllerTest.class
+org\reiz\storage\CashRegisterTest.class
+org\reiz\AppTest.class

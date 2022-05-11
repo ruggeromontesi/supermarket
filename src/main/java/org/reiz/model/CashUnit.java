@@ -9,11 +9,11 @@ public enum CashUnit {
    TWO(2.0),
    ONE(1.0),
    HALF(0.5),
-   TENTH(0.1);//,
-   //ZERO(0.0);
-   private double value;
+   TENTH(0.1);
 
-   private CashUnit(double value) {
+   private final double value;
+
+   CashUnit(double value) {
       this.value = value;
    }
 

@@ -12,8 +12,8 @@ public class CashRegister {
 
    private Map<CashUnit,Integer> till = new TreeMap<>(Comparator.comparingDouble(CashUnit::getValue).reversed());
 
-   public CashRegister() {
-      Arrays.stream(CashUnit.values()).sorted().forEach(cashUnit -> till.put(cashUnit, 3));
+   public CashRegister(int defaultAmount) {
+      Arrays.stream(CashUnit.values()).sorted().forEach(cashUnit -> till.put(cashUnit, defaultAmount));
    }
 
    public Map<CashUnit, Integer> getTill() {
