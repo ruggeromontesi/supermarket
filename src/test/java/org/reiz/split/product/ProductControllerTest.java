@@ -7,8 +7,6 @@ public class ProductControllerTest {
 
    @Test
    public void testManageSupermarketOperation() {
-      SupermarketServiceImpl controller = new SupermarketServiceImpl();
-      controller.runSupermarket();
 
    }
 }

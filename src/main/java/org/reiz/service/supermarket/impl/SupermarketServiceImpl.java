@@ -14,6 +14,8 @@ import org.reiz.storage.ProductStorage;
 
 public class SupermarketServiceImpl implements SupermarketService {
 
+   private final static SupermarketServiceImpl instance = new SupermarketServiceImpl();
+
    private String userTypedProduct = "";
 
    private Product selectedProduct;
@@ -22,12 +24,21 @@ public class SupermarketServiceImpl implements SupermarketService {
 
    private ProductStorage productStorage = new ProductStorage();
 
-   private CashRegister cashRegister = new CashRegister(50);
+   private CashRegister cashRegister = CashRegister.getInstance();
 
-   private CashService controller = new CashServiceImpl(cashRegister);
+   private CashService cashService = CashServiceImpl.getInstance();
+
+   private SupermarketServiceImpl() {
+   }
+
+   public static SupermarketServiceImpl getInstance() {
+      return  instance;
+   }
 
    public void runSupermarket() {
       int counter = 10;
+      productStorage.fillWithProducts(10);
+      cashRegister.fillWithFiniteAmountOfBillsAndCoins(50);
 
       while (counter-- > 0) {
          try {
@@ -47,8 +58,8 @@ public class SupermarketServiceImpl implements SupermarketService {
    private void stepsShouldBe() {
       listAllAvailableProducts();
       userSelectProductName();
-      controller.userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(dueAmount);
-      controller.provideChangeIfNecessary();
+      cashService.userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(dueAmount);
+      cashService.provideChangeIfNecessary();
       provideProduct();
    }
 
@@ -82,7 +93,7 @@ public class SupermarketServiceImpl implements SupermarketService {
 
    private void listAllAvailableProducts() {
       printProductInventory();
-      controller.printCashInventory();
+      cashService.printCashInventory();
       System.out.println("What would you like to buy? Type in the name of the desired product");
       productStorage.getInventory().forEach(product -> System.out.print(product.getDescription()
             + " (price: " + product.getPrice() + ")  "));

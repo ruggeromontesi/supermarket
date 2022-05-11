@@ -14,9 +14,9 @@ public class ProductStorage {
 
    public ProductStorage() {
       inventory.addAll(Arrays.asList(
-            new Product("SODA", 2.3, 10),
-            new Product("BREAD", 1.1, 10),
-            new Product("WINE", 2.7,10)
+            new Product("SODA", 2.3, 0),
+            new Product("BREAD", 1.1, 0),
+            new Product("WINE", 2.7,0)
       ));
 
    }
@@ -37,6 +37,10 @@ public class ProductStorage {
             }
       ));
 
+   }
+
+   public void fillWithProducts(int amount) {
+      inventory.forEach(product -> product.setQuantity(amount));
    }
 
 }

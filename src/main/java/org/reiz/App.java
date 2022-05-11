@@ -1,7 +1,10 @@
 package org.reiz;
 
+import org.reiz.service.supermarket.impl.SupermarketServiceImpl;
+
 public class App {
    public static void main(String[] args) {
-      System.out.println("Hello World!");
+
+      SupermarketServiceImpl.getInstance().runSupermarket();
    }
 }

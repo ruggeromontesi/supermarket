@@ -13,7 +13,9 @@ import org.reiz.storage.CashRegister;
 
 public class CashServiceImpl implements CashService {
 
-   private CashRegister cashRegister;
+   private CashRegister cashRegister = CashRegister.getInstance();
+
+   private static final CashServiceImpl instance = new CashServiceImpl();
 
    private double amountPaidDuringSingleBillCoinInsertion = 0;
 
@@ -27,10 +29,12 @@ public class CashServiceImpl implements CashService {
 
    private Map<CashUnit,Integer> changeCashUnitTable = getEmptyCashUnitTable();
 
-   //private static final CashServiceImpl instance = new CashServiceImpl(cashRegister);
+   private CashServiceImpl() {
 
-   public CashServiceImpl(CashRegister cashRegister) {
-      this.cashRegister = cashRegister;
+   }
+
+   public static CashServiceImpl getInstance() {
+      return instance;
    }
 
    public static Map<CashUnit,Integer> getEmptyCashUnitTable() {

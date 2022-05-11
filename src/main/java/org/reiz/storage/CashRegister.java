@@ -10,10 +10,15 @@ import org.reiz.model.CashUnit;
 
 public class CashRegister {
 
+   private static final CashRegister instance = new CashRegister();
+
    private Map<CashUnit,Integer> till = new TreeMap<>(Comparator.comparingDouble(CashUnit::getValue).reversed());
 
-   public CashRegister(int defaultAmount) {
-      Arrays.stream(CashUnit.values()).sorted().forEach(cashUnit -> till.put(cashUnit, defaultAmount));
+   private CashRegister() {
+   }
+
+   public static  CashRegister getInstance() {
+      return instance;
    }
 
    public Map<CashUnit, Integer> getTill() {
@@ -22,5 +27,9 @@ public class CashRegister {
 
    public double getTotalAmountOfMoney() {
       return till.entrySet().stream().collect(Collectors.summingDouble(e -> e.getKey().getValue() * e.getValue()));
+   }
+
+   public void fillWithFiniteAmountOfBillsAndCoins(int amount) {
+      Arrays.stream(CashUnit.values()).sorted().forEach(cashUnit -> till.put(cashUnit, amount));
    }
 }

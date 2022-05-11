@@ -7,7 +7,8 @@ public class CashRegisterTest {
 
    @Test
    public void testGetTotalAmountOfMoney( ){
-      CashRegister cashRegister = new CashRegister(50);
+      CashRegister cashRegister = CashRegister.getInstance();
+      cashRegister.fillWithFiniteAmountOfBillsAndCoins(50);
       Assert.assertEquals(180.0,cashRegister.getTotalAmountOfMoney(), 0.00001 );
    }
 }
