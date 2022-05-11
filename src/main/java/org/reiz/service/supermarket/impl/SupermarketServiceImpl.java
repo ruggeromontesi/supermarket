@@ -43,7 +43,7 @@ public class SupermarketServiceImpl implements SupermarketService {
 
       while (counter-- > 0) {
          try {
-            stepsShouldBe();
+            executeSteps();
 
          } catch (NotEnoughChangeException ex) {
             System.out.println("Supermarket doesn't have sufficient change to complete this transaction");
@@ -56,7 +56,7 @@ public class SupermarketServiceImpl implements SupermarketService {
 
    }
 
-   private void stepsShouldBe() {
+   private void executeSteps() {
       listAllAvailableProducts();
       userSelectProductName();
       cashService.userInsertsMultipleCoinsOrBillsTillReachingTheDueAmount(dueAmount);
