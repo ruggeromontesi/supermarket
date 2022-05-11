@@ -158,7 +158,7 @@ public class CashServiceImpl implements CashService {
    }
 
    private boolean verifyIfTransactionHasToBeCanceled(String interruptCommand) {
-      if(interruptCommand.equals("CANCEL")) {
+      if (interruptCommand.equals("CANCEL")) {
          isTransactionToBeCanceled =  true;
       }
       return isTransactionToBeCanceled;
